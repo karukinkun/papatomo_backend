@@ -4,8 +4,8 @@ services:
     image: postgres
     # dbのユーザー名とパスワードでこれが無いとdbが起動できなかった
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     ports:
       - "3306:3306"
     # 無くても動くけど指定しておくとdocker-composeを停止してもdbの内容が永続化されるため、指定することが多いと思われる
@@ -16,16 +16,20 @@ services:
     # https://docs.docker.jp/v19.03/config/container/start-containers-automatically.html
     restart: always
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APPNAME=$APPNAME
     # tmp/pids/server.pidが残ってたら `A server is already running. ~~` のエラーでrailsを起動できないので事前に消してから、`rails sever` する
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3001 -b '0.0.0.0'"
     # 上記のdbイメージで指定したユーザー名とパスワードをrails側でも指定するため環境変数に設定。
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     # ホストのカレントディレクトリ(.)とイメージ内の/myappディレクトリを同期させている
     volumes:
-      - .:/myapp
+      - .:/$APPNAME
     ports:
       - "3001:3001"
     restart: always # コンテナが停止すると常に再起動
