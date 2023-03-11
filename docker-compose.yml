@@ -27,6 +27,7 @@ services:
     environment:
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      API_DOMAIN: "localhost:$FRONT_PORT"
     # ホストのカレントディレクトリ(.)とイメージ内の/myappディレクトリを同期させている
     volumes:
       - .:/$APPNAME
